@@ -91,18 +91,18 @@ def create_app(test_config=None):
             'categories': categories_dict
         })
 
-    @app.route('/questions/<int:id>', methods=['DELETE'])
-    def delete_question(id):
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def delete_question(question_id):
         '''
         Handles DELETE requests for deleting a question by id.
         '''
 
         try:
             # get the question by id
-            question = Question.query.filter_by(id=id).one_or_none()
+            question = Question.query.get(question_id)
 
             # abort 404 if no question found
-            if question is None:
+            if question == None:
                 abort(404)
 
             # delete the question
@@ -127,8 +127,8 @@ def create_app(test_config=None):
         body = request.get_json()
 
         # if search term is present
-        if (body.get('searchTerm')):
-            search_term = body.get('searchTerm')
+        if (body['searchTerm']):
+            search_term = body['searchTerm']
 
             # query the database using search term
             selection = Question.query.filter(
@@ -183,21 +183,21 @@ def create_app(test_config=None):
                 # abort unprocessable if exception
                 abort(422)
 
-    @app.route('/categories/<int:id>/questions')
-    def get_questions_by_category(id):
+    @app.route('/categories/<int:question_id>/questions')
+    def get_questions_by_category(question_id):
         '''
         Handles GET requests for getting questions based on category.
         '''
 
         # get the category by id
-        category = Category.query.filter_by(id=id).one_or_none()
+        category = Category.get(question_id)
 
         # abort 400 for bad request if category isn't found
         if (category is None):
             abort(400)
 
         # get the matching questions
-        selection = Question.query.filter_by(category=category.id).all()
+        selection = Question.query.filter_by(category.id).all()
 
         # paginate the selection
         paginated = paginate_questions(request, selection)
